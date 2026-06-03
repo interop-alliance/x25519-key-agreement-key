@@ -4,6 +4,11 @@
 
 ### Changed
 
+- **BREAKING**: Forked to
+  [`interop-alliance/x25519-key-agreement-key`](https://github.com/interop-alliance/x25519-key-agreement-key)
+  and renamed the published package from
+  `@digitalcredentials/x25519-key-agreement-key-2020` to
+  `@interop/x25519-key-agreement-key`.
 - **BREAKING**: Converted the source to TypeScript and the published package to
   ESM-only (`"type": "module"`). The compiled output now ships type declarations
   (`.d.ts`).
