@@ -1,6 +1,6 @@
 # @interop/x25519-key-agreement-key Changelog
 
-## 4.0.0 - 2026-06-03
+## 4.0.0-4.0.1 - 2026-06-03
 
 ### Changed
 
