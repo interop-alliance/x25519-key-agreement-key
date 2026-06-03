@@ -10,7 +10,7 @@ import {
   type IVerificationResult,
   type IVerifier
 } from '@interop/data-integrity-core'
-import { Point } from '@noble/ed25519'
+import { ed25519 } from '@noble/curves/ed25519.js'
 
 import { base58btc } from './baseX.js'
 import {
@@ -257,10 +257,12 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
       publicKeyMultibase
     )
 
-    // Converts a 32-byte Ed25519 public key into a 32-byte Curve25519 key
-    // Returns null if the given public key in not a valid Ed25519 public key.
-    const dhPubkeyBytes = Point.fromHex(edPubkeyBytes).toX25519()
-    if (!dhPubkeyBytes) {
+    // Converts a 32-byte Ed25519 public key into a 32-byte Curve25519 key.
+    // Throws if the given public key is not a valid Ed25519 public key.
+    let dhPubkeyBytes: Uint8Array
+    try {
+      dhPubkeyBytes = ed25519.utils.toMontgomery(edPubkeyBytes)
+    } catch {
       throw new Error('Error converting to X25519; Invalid Ed25519 public key.')
     }
     return _multibaseEncode(MULTICODEC_X25519_PUB_HEADER, dhPubkeyBytes)
