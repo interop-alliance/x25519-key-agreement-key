@@ -25,8 +25,8 @@ importers:
         specifier: ^6.0.0
         version: 6.0.0
       '@digitalcredentials/ed25519-verification-key-2020':
-        specifier: ^1.0.1
-        version: 1.0.2
+        specifier: ^5.0.0
+        version: 5.0.0
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.4.1)
@@ -94,13 +94,17 @@ packages:
     resolution: {integrity: sha512-3EV/x7/Sa5mOAuPf0Z0Fi+BsIQKR5Qi2u/KNUgMc1fHx9jQZWjF3//1hvSDDrKV+FKfhAg10S7EcgU04f5tjog==}
     engines: {node: '>=14'}
 
-  '@digitalcredentials/base58-universal@1.0.1':
-    resolution: {integrity: sha512-1xKdJnfITMvrF/sCgwBx2C4p7qcNAARyIvrAOZGqIHmBaT/hAenpC8bf44qVY+UIMuCYP23kqpIfJQebQDThDQ==}
-    engines: {node: '>=12'}
+  '@digitalcredentials/ed25519-verification-key-2020@5.0.0':
+    resolution: {integrity: sha512-Uo9D5czn6FBFKze780TQ+nquPL60DUe4zhUSlackvYKf3iZydjH58LEr/X4yAv4YC51KXo8cgCVoKkjoJ7WaXw==}
+    engines: {node: '>=20'}
 
-  '@digitalcredentials/ed25519-verification-key-2020@1.0.2':
-    resolution: {integrity: sha512-qm4sbsapBiIPfLYJypuLbUqxW6gyFO4d6vwmRL8PGeqan0lTHn9KjGLkSWkDslrP3dZ5qP32HqWlerj4yW2Qjg==}
-    engines: {node: '>=14'}
+  '@digitalcredentials/keypair@3.0.0':
+    resolution: {integrity: sha512-kVap/M6LDxY0YuEkhzV9AUn03BjMbGZlq+OKS/1nmCH6r1tXQDKbKOwGH6uocsBQm3VIg5Qy7tcHkqaLy6jOUw==}
+    engines: {node: '>=18.0'}
+
+  '@digitalcredentials/ssi@5.5.0':
+    resolution: {integrity: sha512-vKJwLlab+SPqOygpcreSbQZxP+hIwcLq7rJYA+oHFJQqrTXatWl9oWW+cnCv5R4VCARUhPOUio5xhM/v8YdXXA==}
+    engines: {node: '>=20.0'}
 
   '@emnapi/core@1.10.0':
     resolution: {integrity: sha512-yq6OkJ4p82CAfPl0u9mQebQHKPJkY7WrIuk205cTYnYe+k2Z8YBh11FrbRG/H6ihirqcacOgl2BIO8oyMQLeXw==}
@@ -310,27 +314,6 @@ packages:
   '@scure/base@2.2.0':
     resolution: {integrity: sha512-b8XEupJibegiXV+tDUseI8oLQc8ei3d/4Jkb2RpbHh3MfE054ov3uIz2dhFkB3FI8iwYkEh0gGCApkrYggkPNg==}
 
-  '@stablelib/binary@1.0.1':
-    resolution: {integrity: sha512-ClJWvmL6UBM/wjkvv/7m5VP3GMr9t0osr4yVgLZsLCOz4hGN9gIAFEqnJ0TsSMAN+n840nf2cHZnA5/KFqHC7Q==}
-
-  '@stablelib/ed25519@1.0.3':
-    resolution: {integrity: sha512-puIMWaX9QlRsbhxfDc5i+mNPMY+0TmQEskunY1rZEBPi1acBCVQAhnsk/1Hk50DGPtVsZtAWQg4NHGlVaO9Hqg==}
-
-  '@stablelib/hash@1.0.1':
-    resolution: {integrity: sha512-eTPJc/stDkdtOcrNMZ6mcMK1e6yBbqRBaNW55XA1jU8w/7QdnCF0CmMmOD1m7VSkBR44PWrMHU2l6r8YEQHMgg==}
-
-  '@stablelib/int@1.0.1':
-    resolution: {integrity: sha512-byr69X/sDtDiIjIV6m4roLVWnNNlRGzsvxw+agj8CIEazqWGOQp2dTYgQhtyVXV9wpO6WyXRQUzLV/JRNumT2w==}
-
-  '@stablelib/random@1.0.2':
-    resolution: {integrity: sha512-rIsE83Xpb7clHPVRlBj8qNe5L8ISQOzjghYQm/dZ7VaM2KHYwMW5adjQjrzTZCchFnNCNhkwtnOBa9HTMJCI8w==}
-
-  '@stablelib/sha512@1.0.1':
-    resolution: {integrity: sha512-13gl/iawHV9zvDKciLo1fQ8Bgn2Pvf7OV6amaRVKiq3pjQ3UmEpXxWiAfV8tYjUpeZroBxtyrwtdooQT/i3hzw==}
-
-  '@stablelib/wipe@1.0.1':
-    resolution: {integrity: sha512-WfqfX/eXGiAd3RJe4VU2snh/ZPwtSjLG4ynQ/vYzvghTh7dHFcI1wl+nrkWG6lGhukOxOsUHfv8dUXr58D0ayg==}
-
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
@@ -476,6 +459,9 @@ packages:
     resolution: {integrity: sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==}
     engines: {node: 18 || 20 || >=22}
 
+  base-x@4.0.1:
+    resolution: {integrity: sha512-uAZ8x6r6S3aUM9rbHGVOIsR15U/ZSc82b3ymnCPsT45Gk1DDvhDPdIgB5MrhirZWt+5K0EEPQH985kNqZgNPFw==}
+
   base58-universal@2.0.0:
     resolution: {integrity: sha512-BgkgF8zVLOAygszG4W8NkLm7iXrw80VYAOcedrzANrIhS14+4W6zVqjyGTFUBM/FpqkHUt8aAYd4DbBBfn3zKg==}
     engines: {node: '>=14'}
@@ -494,10 +480,6 @@ packages:
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
-
-  crypto-ld@6.0.0:
-    resolution: {integrity: sha512-XWL1LslqggNoaCI/m3I7HcvaSt9b2tYzdrXO+jHLUj9G1BvRfvV7ZTFDVY5nifYuIGAPdAGu7unPxLRustw3VA==}
-    engines: {node: '>=8.3.0'}
 
   crypto-ld@7.0.0:
     resolution: {integrity: sha512-RrXy6aB0TOhSiqsgavTQt1G8mKomKIaNLb2JZxj7A/Vi0EwmXguuBQoeiAvePfK6bDR3uQbqYnaLLs4irTWwgw==}
@@ -1094,13 +1076,18 @@ snapshots:
       ed2curve: 0.3.0
       tweetnacl: 1.0.3
 
-  '@digitalcredentials/base58-universal@1.0.1': {}
-
-  '@digitalcredentials/ed25519-verification-key-2020@1.0.2':
+  '@digitalcredentials/ed25519-verification-key-2020@5.0.0':
     dependencies:
-      '@digitalcredentials/base58-universal': 1.0.1
-      '@stablelib/ed25519': 1.0.3
-      crypto-ld: 6.0.0
+      '@digitalcredentials/keypair': 3.0.0
+      '@digitalcredentials/ssi': 5.5.0
+      '@noble/ed25519': 1.7.5
+      base-x: 4.0.1
+
+  '@digitalcredentials/keypair@3.0.0':
+    dependencies:
+      '@digitalcredentials/ssi': 5.5.0
+
+  '@digitalcredentials/ssi@5.5.0': {}
 
   '@emnapi/core@1.10.0':
     dependencies:
@@ -1252,33 +1239,6 @@ snapshots:
   '@rolldown/pluginutils@1.0.1': {}
 
   '@scure/base@2.2.0': {}
-
-  '@stablelib/binary@1.0.1':
-    dependencies:
-      '@stablelib/int': 1.0.1
-
-  '@stablelib/ed25519@1.0.3':
-    dependencies:
-      '@stablelib/random': 1.0.2
-      '@stablelib/sha512': 1.0.1
-      '@stablelib/wipe': 1.0.1
-
-  '@stablelib/hash@1.0.1': {}
-
-  '@stablelib/int@1.0.1': {}
-
-  '@stablelib/random@1.0.2':
-    dependencies:
-      '@stablelib/binary': 1.0.1
-      '@stablelib/wipe': 1.0.1
-
-  '@stablelib/sha512@1.0.1':
-    dependencies:
-      '@stablelib/binary': 1.0.1
-      '@stablelib/hash': 1.0.1
-      '@stablelib/wipe': 1.0.1
-
-  '@stablelib/wipe@1.0.1': {}
 
   '@standard-schema/spec@1.1.0': {}
 
@@ -1473,6 +1433,8 @@ snapshots:
 
   balanced-match@4.0.4: {}
 
+  base-x@4.0.1: {}
+
   base58-universal@2.0.0: {}
 
   brace-expansion@5.0.6:
@@ -1488,8 +1450,6 @@ snapshots:
       path-key: 3.1.1
       shebang-command: 2.0.0
       which: 2.0.2
-
-  crypto-ld@6.0.0: {}
 
   crypto-ld@7.0.0: {}
 
