@@ -24,6 +24,11 @@
 - Replaced `@digitalcredentials/base58-universal` with
   [`@scure/base`](https://www.npmjs.com/package/@scure/base) for base58btc
   encoding.
+- Replaced `@noble/ed25519` (v1) with
+  [`@noble/curves`](https://www.npmjs.com/package/@noble/curves) for the Ed25519
+  public key to X25519 conversion, using `ed25519.utils.toMontgomery()`.
+  `@noble/ed25519` v2+ removed the Edwards-to-Montgomery conversion this library
+  relied on.
 - Migrated tooling to the isomorphic-lib-template infrastructure: pnpm, a `tsc`
   build, ESLint flat config, Prettier 3, vitest (Node tests), and Playwright
   (browser tests).
