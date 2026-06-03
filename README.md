@@ -1,6 +1,7 @@
-# X25519KeyAgreementKey2020 _(@digitalcredentials/x25519-key-agreement-key-2020)_
+# X25519KeyAgreementKey2020 _(@interop/x25519-key-agreement-key)_
 
-[![NPM Version](https://img.shields.io/npm/v/@digitalcredentials/x25519-key-agreement-key-2020.svg)](https://npm.im/@digitalcredentials/x25519-key-agreement-key-2020)
+[![CI](https://github.com/interop-alliance/x25519-key-agreement-key/workflows/CI/badge.svg)](https://github.com/interop-alliance/x25519-key-agreement-key/actions?query=workflow%3ACI)
+[![NPM Version](https://img.shields.io/npm/v/@interop/x25519-key-agreement-key)](https://www.npmjs.com/package/@interop/x25519-key-agreement-key)
 
 > An X25519 (Curve25519) DH (Diffie-Hellman) key implementation to work with the
 > X25519 2020 Crypto suite.
@@ -22,6 +23,8 @@ TBD
 ## Background
 
 (Forked from
+[`digitalcredentials/x25519-key-agreement-key-2020`](https://github.com/digitalcredentials/x25519-key-agreement-key-2020),
+which was in turn forked from
 [`digitalbazaar/x25519-key-agreement-key-2020` v2.0.0](https://github.com/digitalbazaar/x25519-key-agreement-key-2020)
 to provide TypeScript compatibility.)
 
@@ -45,11 +48,17 @@ Requires Node.js 24+
 
 This is an ESM-only package (`"type": "module"`).
 
+To install as a dependency:
+
+```
+npm install @interop/x25519-key-agreement-key
+```
+
 To install locally (for development):
 
 ```
-git clone https://github.com/digitalcredentials/x25519-key-agreement-key-2020.git
-cd x25519-key-agreement-key-2020
+git clone https://github.com/interop-alliance/x25519-key-agreement-key.git
+cd x25519-key-agreement-key
 pnpm install
 ```
 
@@ -58,7 +67,7 @@ pnpm install
 Importing:
 
 ```js
-import { X25519KeyAgreementKey2020 } from '@digitalcredentials/x25519-key-agreement-key-2020'
+import { X25519KeyAgreementKey2020 } from '@interop/x25519-key-agreement-key'
 ```
 
 Generating:
