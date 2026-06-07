@@ -2,7 +2,7 @@
  * Copyright (c) 2021-2022 Digital Bazaar, Inc. All rights reserved.
  */
 import * as crypto from 'crypto'
-import * as cryptoNacl from './crypto-nacl.js'
+import * as cryptoFallback from './crypto-react-native.js'
 import { promisify } from 'util'
 
 const PUBLIC_KEY_DER_PREFIX = new Uint8Array([
@@ -63,11 +63,11 @@ if (typeof crypto.diffieHellman === 'function') {
   deriveSecret = deriveSecretNative
   generateKeyPair = generateKeyPairNative
 } else {
-  deriveSecret = cryptoNacl.deriveSecret
-  generateKeyPair = cryptoNacl.generateKeyPair
+  deriveSecret = cryptoFallback.deriveSecret
+  generateKeyPair = cryptoFallback.generateKeyPair
 }
 
 export { deriveSecret, generateKeyPair }
 
-const { ed25519SecretKeyToX25519 } = cryptoNacl
+const { ed25519SecretKeyToX25519 } = cryptoFallback
 export { ed25519SecretKeyToX25519 }

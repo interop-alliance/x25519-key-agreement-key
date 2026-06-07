@@ -35,7 +35,7 @@
     "buffer": false,
     "crypto": false,
     "util": false,
-    "./dist/crypto.js": "./dist/crypto-nacl.js"
+    "./dist/crypto.js": "./dist/crypto-react-native.js"
   },
   "sideEffects": false,
   "dependencies": {

@@ -5,4 +5,4 @@ export {
   deriveSecret,
   generateKeyPair,
   ed25519SecretKeyToX25519
-} from './crypto-nacl.js'
+} from './crypto-react-native.js'
