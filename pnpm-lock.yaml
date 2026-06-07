@@ -17,9 +17,6 @@ importers:
       '@scure/base':
         specifier: ^2.2.0
         version: 2.2.0
-      tweetnacl:
-        specifier: ^1.0.3
-        version: 1.0.3
     devDependencies:
       '@digitalbazaar/x25519-key-agreement-key-2019':
         specifier: ^6.0.0

@@ -1,7 +1,7 @@
 /*!
  * Copyright (c) 2021-2022 Digital Bazaar, Inc. All rights reserved.
  */
-import nacl from 'tweetnacl'
+import { x25519, ed25519 } from '@noble/curves/ed25519.js'
 
 /**
  * Note: The following two functions are async to match the signature of
@@ -15,7 +15,7 @@ export async function deriveSecret({
   privateKey: Uint8Array
   remotePublicKey: Uint8Array
 }): Promise<Uint8Array> {
-  return nacl.scalarMult(privateKey, remotePublicKey)
+  return x25519.getSharedSecret(privateKey, remotePublicKey)
 }
 
 export async function generateKeyPair(): Promise<{
@@ -23,25 +23,14 @@ export async function generateKeyPair(): Promise<{
   privateKey: Uint8Array
 }> {
   // Each is a Uint8Array with 32-byte key
-  const { publicKey, secretKey: privateKey } = nacl.box.keyPair()
+  const { secretKey: privateKey, publicKey } = x25519.keygen()
   return { publicKey, privateKey }
 }
 
 export function ed25519SecretKeyToX25519(secretKey: Uint8Array): Uint8Array {
-  const hash = new Uint8Array(64)
-  // X25519 secret key is the first 32 bytes of the hash with clamped values.
-  // `nacl.lowlevel` is not covered by tweetnacl's published type definitions.
-  const { lowlevel } = nacl as unknown as {
-    lowlevel: {
-      crypto_hash(out: Uint8Array, m: Uint8Array, n: number): number
-    }
-  }
-  lowlevel.crypto_hash(hash, secretKey, 32)
-  hash[0] &= 248
-  hash[31] &= 127
-  hash[31] |= 64
-  const x25519SecretKey = hash.slice(0, 32)
-  // zero-fill remainder of hash before returning
-  hash.fill(0, 32)
-  return x25519SecretKey
+  // `toMontgomerySecret` hashes and clamps the 32-byte Ed25519 secret seed.
+  // The historical input here is a 64-byte Ed25519 secret key of which only
+  // the first 32 bytes (the seed) are used; noble throws on a 64-byte input,
+  // so slice to the seed to preserve existing behavior.
+  return ed25519.utils.toMontgomerySecret(secretKey.slice(0, 32))
 }
