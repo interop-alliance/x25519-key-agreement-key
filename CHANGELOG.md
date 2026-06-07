@@ -1,5 +1,13 @@
 # @interop/x25519-key-agreement-key Changelog
 
+## Unreleased - TBD
+
+### Changed
+
+- Replaced `tweetnacl` with `@noble/curves` for X25519 Diffie-Hellman, key
+  generation, and Ed25519-to-X25519 secret-key conversion; removed the
+  `tweetnacl` dependency. No public API change.
+
 ## 4.0.0-4.0.1 - 2026-06-03
 
 ### Changed

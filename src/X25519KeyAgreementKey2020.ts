@@ -289,11 +289,6 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
     // Converts a 64-byte Ed25519 secret key (or just the first 32-byte part of
     // it, which is the secret value) into a 32-byte Curve25519 secret key
     const dhPrivkeyBytes = ed25519SecretKeyToX25519(edPrivkeyBytes)
-    // note: a future version should make this method async to allow use of
-    // noble to convert private keys -- but the tweetnacl version used
-    // internally is much faster (~ x100):
-    // const {head: dhPrivkeyBytes} = await utils.getExtendedPublicKey(
-    //   edPrivkeyBytes.slice(0, 32));
     if (!dhPrivkeyBytes) {
       throw new Error(
         'Error converting to X25519; Invalid Ed25519 private key.'
