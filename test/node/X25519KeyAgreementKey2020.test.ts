@@ -127,6 +127,13 @@ describe('X25519KeyAgreementKey2020', () => {
       expect(exported).toHaveProperty('privateKeyMultibase')
     })
 
+    it('should include the JSON-LD context when requested', async () => {
+      const key = await X25519KeyAgreementKey2020.generate()
+
+      const exported = key.export({ publicKey: true, includeContext: true })
+      expect(exported['@context']).toBe(X25519KeyAgreementKey2020.SUITE_CONTEXT)
+    })
+
     it('should export both public and private key', async () => {
       const key = await X25519KeyAgreementKey2020.generate({
         controller: 'did:example:1234'
