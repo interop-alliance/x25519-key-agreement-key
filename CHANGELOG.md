@@ -1,6 +1,6 @@
 # @interop/x25519-key-agreement-key Changelog
 
-## Unreleased - TBD
+## 4.0.2 - 2026-06-07
 
 ### Added
 
