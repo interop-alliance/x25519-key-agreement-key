@@ -2,6 +2,15 @@
 
 ## Unreleased - TBD
 
+### Added
+
+- Expanded the test suite (statement coverage 78% -- 96%): RFC 7748 X25519 test
+  vectors (Section 6.1 Diffie-Hellman and Section 5.2 scalar multiplication) run
+  through both the native Node and `@noble/curves` backends, a cross-backend
+  agreement check, and error-path coverage for constructor/header validation,
+  key conversion, fingerprint, `deriveSecret`, `export`, `signer`, and
+  `verifier`. No library behavior change.
+
 ### Changed
 
 - Replaced `tweetnacl` with `@noble/curves` for X25519 Diffie-Hellman, key
