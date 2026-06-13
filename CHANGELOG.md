@@ -1,5 +1,12 @@
 # @interop/x25519-key-agreement-key Changelog
 
+## 5.0.0 - 2026-06-
+
+### Changed
+
+- Update to `@interop/data-integrity-core@8.0.0`.
+- **BREAKING**: `export()` is now async.
+
 ## 4.0.2 - 2026-06-07
 
 ### Added

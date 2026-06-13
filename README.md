@@ -90,7 +90,7 @@ const keyPair = await X25519KeyAgreementKey2020.generate({
 Serializing just the public key:
 
 ```js
-keyPair.export({publicKey: true});
+await keyPair.export({publicKey: true});
 // ->
 {
   "id": "did:example:1234#z6LSeRSE5Em5oJpwdk3NBaLVERBS332ULC7EQq5EtMsmXhsM",
