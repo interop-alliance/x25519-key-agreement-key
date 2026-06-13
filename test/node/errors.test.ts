@@ -187,7 +187,7 @@ describe('X25519KeyAgreementKey2020 error paths', () => {
   describe('export', () => {
     it('throws when neither publicKey nor privateKey is requested', async () => {
       const key = await X25519KeyAgreementKey2020.from(validKey)
-      expect(() => key.export()).toThrow(
+      await expect(key.export()).rejects.toThrow(
         'Export requires specifying either "publicKey" or "privateKey".'
       )
     })

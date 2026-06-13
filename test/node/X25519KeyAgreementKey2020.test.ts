@@ -75,7 +75,7 @@ describe('X25519KeyAgreementKey2020', () => {
       )
 
       // Check to make sure export works after conversion
-      const exported = xKeyPair.export({ publicKey: true })
+      const exported = await xKeyPair.export({ publicKey: true })
 
       expect(exported).toHaveProperty('publicKeyMultibase')
       expect(exported).not.toHaveProperty('privateKeyMultibase')
@@ -114,7 +114,7 @@ describe('X25519KeyAgreementKey2020', () => {
         controller: 'did:ex:1234'
       })
 
-      const exported = key.export({ publicKey: true })
+      const exported = await key.export({ publicKey: true })
       expect(exported).toHaveProperty('publicKeyMultibase')
       expect(exported).not.toHaveProperty('privateKeyMultibase')
     })
@@ -122,7 +122,7 @@ describe('X25519KeyAgreementKey2020', () => {
     it('should export only the private key', async () => {
       const key = await X25519KeyAgreementKey2020.generate()
 
-      const exported = key.export({ privateKey: true })
+      const exported = await key.export({ privateKey: true })
       expect(exported).not.toHaveProperty('publicKeyMultibase')
       expect(exported).toHaveProperty('privateKeyMultibase')
     })
@@ -130,7 +130,10 @@ describe('X25519KeyAgreementKey2020', () => {
     it('should include the JSON-LD context when requested', async () => {
       const key = await X25519KeyAgreementKey2020.generate()
 
-      const exported = key.export({ publicKey: true, includeContext: true })
+      const exported = await key.export({
+        publicKey: true,
+        includeContext: true
+      })
       expect(exported['@context']).toBe(X25519KeyAgreementKey2020.SUITE_CONTEXT)
     })
 
@@ -143,7 +146,7 @@ describe('X25519KeyAgreementKey2020', () => {
         .replace(/\.[0-9]{3}/, '')
       key.revoked = pastDate
 
-      const exported = key.export({ publicKey: true, privateKey: true })
+      const exported = await key.export({ publicKey: true, privateKey: true })
       expect(Object.keys(exported).sort()).toEqual(
         [
           'id',

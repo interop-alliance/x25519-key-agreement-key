@@ -305,10 +305,10 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
    * @param {boolean} [options.privateKey] - Export private key material?
    * @param {boolean} [options.includeContext] - Include JSON-LD context?
    *
-   * @returns {object} A plain js object that's ready for serialization
+   * @returns {Promise<object>} A plain js object that's ready for serialization
    *   (to JSON, etc), for use in DIDs etc.
    */
-  export({
+  async export({
     publicKey = false,
     privateKey = false,
     includeContext = false
@@ -316,7 +316,7 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
     publicKey?: boolean
     privateKey?: boolean
     includeContext?: boolean
-  } = {}): IVerificationKeyPair2020 {
+  } = {}): Promise<IVerificationKeyPair2020> {
     if (!(publicKey || privateKey)) {
       throw new TypeError(
         'Export requires specifying either "publicKey" or "privateKey".'

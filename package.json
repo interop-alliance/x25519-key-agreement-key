@@ -39,7 +39,7 @@
   },
   "sideEffects": false,
   "dependencies": {
-    "@interop/data-integrity-core": "^6.1.1",
+    "@interop/data-integrity-core": "^8.0.0",
     "@noble/curves": "^2.2.0",
     "@scure/base": "^2.2.0"
   },
