@@ -129,6 +129,11 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
    * (constructor method).
    *
    * @param {object} [options={}] - Keypair options (see controller docstring).
+   * @param {boolean} [options.didKey=false] - When the source has neither a
+   *   `controller` nor an `id`, default its `controller` to the key's own
+   *   `did:key` form (`did:key:<publicKeyMultibase>`), so the constructor
+   *   derives a self-contained `did:key:<mb>#<mb>` `id`. Ignored when a
+   *   `controller` or `id` is already present.
    *
    * @returns {X25519KeyAgreementKey2020} An X25519 Key Pair.
    */
@@ -136,14 +141,19 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
     options: IKeyAgreementKeyPair2020 & {
       publicKeyBase58?: string
       privateKeyBase58?: string
+      didKey?: boolean
     } = {}
   ): Promise<X25519KeyAgreementKey2020> {
+    const { didKey = false, ...keyPairOptions } = options
     // Check to see if this is an X25519KeyAgreementKey2019
-    if (options.publicKeyBase58) {
+    if (keyPairOptions.publicKeyBase58) {
       // Convert it to a 2020 key pair instance
-      return this.fromX25519KeyAgreementKey2019(options)
+      return this.fromX25519KeyAgreementKey2019(keyPairOptions)
     }
-    return new X25519KeyAgreementKey2020(options)
+    if (didKey && !keyPairOptions.controller && !keyPairOptions.id) {
+      keyPairOptions.controller = `did:key:${keyPairOptions.publicKeyMultibase}`
+    }
+    return new X25519KeyAgreementKey2020(keyPairOptions)
   }
 
   /**
@@ -371,14 +381,23 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
    *
    * @param {object} [options={}] - Options hashmap.
    * @param {string} options.fingerprint - Public key fingerprint.
+   * @param {boolean} [options.didKey=false] - Give the resulting key a
+   *   `did:key` identity: set its `controller` to `did:key:<fingerprint>`, so
+   *   its `id` is the self-contained `did:key:<fingerprint>#<fingerprint>`. Off
+   *   by default, so the key has no `controller`/`id` unless requested.
    *
    * @returns {X25519KeyAgreementKey2020} Key pair instance (public key material
    *   only) created from the fingerprint.
    */
   static fromFingerprint({
-    fingerprint
-  }: { fingerprint?: string } = {}): X25519KeyAgreementKey2020 {
+    fingerprint,
+    didKey = false
+  }: {
+    fingerprint?: string
+    didKey?: boolean
+  } = {}): X25519KeyAgreementKey2020 {
     return new X25519KeyAgreementKey2020({
+      controller: didKey ? `did:key:${fingerprint}` : undefined,
       publicKeyMultibase: fingerprint
     })
   }

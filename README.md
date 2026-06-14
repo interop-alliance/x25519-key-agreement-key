@@ -127,6 +127,21 @@ const keyPair = await X25519KeyAgreementKey2020.from({
 })
 ```
 
+Giving a key a self-contained `did:key` identity (when it has no controller of
+its own, e.g. a bare recipient public key) -- pass `didKey: true` to `from()` or
+`fromFingerprint()`:
+
+```js
+const recipient = X25519KeyAgreementKey2020.fromFingerprint({
+  fingerprint: 'z6LSeRSE5Em5oJpwdk3NBaLVERBS332ULC7EQq5EtMsmXhsM',
+  didKey: true
+})
+// recipient.controller ->
+//   'did:key:z6LSeRSE5Em5oJpwdk3NBaLVERBS332ULC7EQq5EtMsmXhsM'
+// recipient.id ->
+//   'did:key:z6LSeRSE5Em5oJpwdk3NBaLVERBS332ULC7EQq5EtMsmXhsM#z6LSeRSE5Em5oJpwdk3NBaLVERBS332ULC7EQq5EtMsmXhsM'
+```
+
 ## Contribute
 
 See
