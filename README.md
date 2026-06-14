@@ -4,21 +4,16 @@
 [![NPM Version](https://img.shields.io/npm/v/@interop/x25519-key-agreement-key)](https://www.npmjs.com/package/@interop/x25519-key-agreement-key)
 
 > An X25519 (Curve25519) DH (Diffie-Hellman) key implementation to work with the
-> X25519 2020 Crypto suite.
+> X25519 2020 Crypto suite for JS/TypeScript, for Node.js, browser and React Native.
 
 ## Table of Contents
 
-- [Security](#security)
 - [Background](#background)
 - [Install](#install)
 - [Usage](#usage)
 - [Contribute](#contribute)
 - [Commercial Support](#commercial-support)
 - [License](#license)
-
-## Security
-
-TBD
 
 ## Background
 
@@ -35,7 +30,7 @@ To actually perform encryption with those keys, we recommend you use the
 [`minimal-cipher`](https://github.com/digitalbazaar/minimal-cipher) library.
 
 This is a low-level level library to generate and serialize X25519 (Curve25519)
-key pairs (uses `nacl.box` under the hood).
+key pairs (uses [`@noble/curves`](https://github.com/paulmillr/noble-curves) under the hood).
 
 See also (related specs):
 
@@ -174,6 +169,6 @@ If editing the Readme, please conform to the
 
 ## License
 
-- MIT License - DCC - TypeScript compatibility.
-- New BSD License (3-clause) © 2020-2021 Digital Bazaar - Initial
+- New BSD License (3-clause) © 2020-2026 Digital Bazaar - Initial
   implementation.
+- Copyright 2026 Interop Alliance - TypeScript conversion.
