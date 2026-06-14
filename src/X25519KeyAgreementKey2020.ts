@@ -5,6 +5,9 @@ import {
   AbstractKeyPair,
   type GenerateKeyPairOptions,
   type IKeyAgreementKeyPair2020,
+  type IMultikeyDocument,
+  type IMultikeyPair,
+  type IPublicMultikey,
   type ISigner,
   type IVerificationKeyPair2020,
   type IVerificationResult,
@@ -30,6 +33,7 @@ const MULTICODEC_ED25519_PRIV_HEADER = new Uint8Array([0x80, 0x26])
 const MULTICODEC_X25519_PUB_HEADER = new Uint8Array([0xec, 0x01])
 // multicodec x25519-priv header as varint
 const MULTICODEC_X25519_PRIV_HEADER = new Uint8Array([0x82, 0x26])
+const MULTIKEY_CONTEXT_V1_URL = 'https://w3id.org/security/multikey/v1'
 
 /**
  * A source Ed25519 verification key (2020) shape, used by the
@@ -138,13 +142,17 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
    * @returns {X25519KeyAgreementKey2020} An X25519 Key Pair.
    */
   static async from(
-    options: IKeyAgreementKeyPair2020 & {
+    options: (IKeyAgreementKeyPair2020 | IMultikeyDocument) & {
       publicKeyBase58?: string
       privateKeyBase58?: string
       didKey?: boolean
     } = {}
   ): Promise<X25519KeyAgreementKey2020> {
     const { didKey = false, ...keyPairOptions } = options
+    // A Multikey-typed verification method (e.g. from a did:key/did:web doc).
+    if (keyPairOptions.type === 'Multikey') {
+      return this.fromMultikey(keyPairOptions as IMultikeyDocument)
+    }
     // Check to see if this is an X25519KeyAgreementKey2019
     if (keyPairOptions.publicKeyBase58) {
       // Convert it to a 2020 key pair instance
@@ -154,6 +162,57 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
       keyPairOptions.controller = `did:key:${keyPairOptions.publicKeyMultibase}`
     }
     return new X25519KeyAgreementKey2020(keyPairOptions)
+  }
+
+  /**
+   * Creates a key pair instance from a Multikey verification method. For X25519
+   * the Multikey `publicKeyMultibase`/`secretKeyMultibase` use the same
+   * multicodec headers as this suite's `publicKeyMultibase`/
+   * `privateKeyMultibase` (x25519-pub / x25519-priv), and an X25519 secret is
+   * always 32 bytes, so the mapping is a field rename -- there is no
+   * key-length reconstruction step (unlike Ed25519). The returned instance is
+   * an `X25519KeyAgreementKey2020`; use {@link toMultikey} to round-trip back.
+   *
+   * @see https://www.w3.org/TR/cid-1.0/#Multikey
+   *
+   * @param {object} options - A Multikey-typed key document.
+   * @param {string} [options.id] - Verification method id.
+   * @param {string} [options.controller] - Controller DID or document url.
+   * @param {string} options.publicKeyMultibase - Multibase encoded public key.
+   * @param {string} [options.secretKeyMultibase] - Multibase encoded secret key.
+   * @param {string} [options.revoked] - Revocation timestamp (RFC3339).
+   *
+   * @returns {X25519KeyAgreementKey2020} An X25519 Key Pair.
+   */
+  static fromMultikey(options: IMultikeyDocument): X25519KeyAgreementKey2020 {
+    const { id, controller, publicKeyMultibase, revoked } = options
+    if (!_isValidKeyHeader(publicKeyMultibase, MULTICODEC_X25519_PUB_HEADER)) {
+      throw new TypeError(
+        '"publicKeyMultibase" has invalid header bytes: ' +
+          `"${publicKeyMultibase}".`
+      )
+    }
+
+    let privateKeyMultibase: string | undefined
+    if ('secretKeyMultibase' in options) {
+      const { secretKeyMultibase } = options
+      if (
+        !_isValidKeyHeader(secretKeyMultibase, MULTICODEC_X25519_PRIV_HEADER)
+      ) {
+        throw new Error('"secretKeyMultibase" has invalid header bytes.')
+      }
+      // Same multicodec header and 32-byte length in both serializations, so
+      // the Multikey secret is this suite's private key verbatim.
+      privateKeyMultibase = secretKeyMultibase
+    }
+
+    return new X25519KeyAgreementKey2020({
+      id,
+      controller,
+      revoked,
+      publicKeyMultibase,
+      privateKeyMultibase
+    })
   }
 
   /**
@@ -352,6 +411,61 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
       exportedKey.revoked = this.revoked
     }
     return exportedKey
+  }
+
+  /**
+   * Serializes this key pair as a Multikey verification method (opt-in;
+   * `export()` remains the default `X25519KeyAgreementKey2020` serialization).
+   * `publicKeyMultibase` is always emitted; the X25519 secret carries the same
+   * multicodec header in both forms, so `secretKeyMultibase` is the suite
+   * `privateKeyMultibase` verbatim.
+   *
+   * @see https://www.w3.org/TR/cid-1.0/#Multikey
+   *
+   * @param {object} [options={}] - Options hashmap.
+   * @param {boolean} [options.secretKey=false] - Export secret key material too?
+   * @param {boolean} [options.includeContext=true] - Include the Multikey
+   *   JSON-LD context?
+   *
+   * @returns {IMultikeyDocument} `IPublicMultikey` (default) or `IMultikeyPair`
+   *   (when `secretKey: true`).
+   */
+  toMultikey(options: {
+    secretKey: true
+    includeContext?: boolean
+  }): IMultikeyPair
+  toMultikey(options?: {
+    secretKey?: false
+    includeContext?: boolean
+  }): IPublicMultikey
+  toMultikey({
+    secretKey = false,
+    includeContext = true
+  }: { secretKey?: boolean; includeContext?: boolean } = {}): IMultikeyDocument {
+    const publicShape: IPublicMultikey = {
+      type: 'Multikey',
+      publicKeyMultibase: this.publicKeyMultibase
+    }
+    if (this.id != null) {
+      publicShape.id = this.id
+    }
+    if (includeContext) {
+      publicShape['@context'] = MULTIKEY_CONTEXT_V1_URL
+    }
+    if (this.controller) {
+      publicShape.controller = this.controller
+    }
+    if (this.revoked) {
+      publicShape.revoked = this.revoked
+    }
+
+    if (secretKey && this.privateKeyMultibase) {
+      return {
+        ...publicShape,
+        secretKeyMultibase: this.privateKeyMultibase
+      } satisfies IMultikeyPair
+    }
+    return publicShape
   }
 
   /**
