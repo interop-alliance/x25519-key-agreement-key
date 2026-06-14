@@ -11,6 +11,15 @@
   behavior is unchanged. This lets consumers (e.g. EDV / minimal-cipher
   recipients) get a fully self-identified key without hand-building the `did:key`
   controller string.
+- Multikey interop. `fromMultikey()` constructs an instance from a
+  `type: 'Multikey'` verification method, and `from()` now dispatches a
+  Multikey-typed document to it (so a recipient whose DID document publishes its
+  X25519 keyAgreement key as a Multikey resolves). `toMultikey()` is an opt-in
+  serialization to the Multikey form (`type: 'Multikey'`, Multikey context,
+  `secretKeyMultibase`). `export()` is unchanged and remains the default
+  `X25519KeyAgreementKey2020` serialization. For X25519 both forms share the
+  same multicodec headers and the secret is always 32 bytes, so the mapping is a
+  field rename with no key-length reconstruction.
 
 ## 5.0.0 - 2026-06-13
 

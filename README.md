@@ -142,6 +142,26 @@ const recipient = X25519KeyAgreementKey2020.fromFingerprint({
 //   'did:key:z6LSeRSE5Em5oJpwdk3NBaLVERBS332ULC7EQq5EtMsmXhsM#z6LSeRSE5Em5oJpwdk3NBaLVERBS332ULC7EQq5EtMsmXhsM'
 ```
 
+Multikey interop. `export()` is the default `X25519KeyAgreementKey2020`
+serialization; `toMultikey()` is the opt-in Multikey form, and `from()` /
+`fromMultikey()` import a Multikey-typed verification method (e.g. a
+`keyAgreement` key from a DID document that uses Multikey):
+
+```js
+const multikey = keyPair.toMultikey({ secretKey: true });
+// ->
+{
+  "@context": "https://w3id.org/security/multikey/v1",
+  "id": "did:example:1234#z6LSeRSE5Em5oJpwdk3NBaLVERBS332ULC7EQq5EtMsmXhsM",
+  "controller": "did:example:1234",
+  "type": "Multikey",
+  "publicKeyMultibase": "z6LSeRSE5Em5oJpwdk3NBaLVERBS332ULC7EQq5EtMsmXhsM",
+  "secretKeyMultibase": "z3weeMD56C1T347EmB6kYNS7trpQwjvtQCpCYRpqGz6mcemT"
+}
+
+const keyPair = await X25519KeyAgreementKey2020.from(multikey);
+```
+
 ## Contribute
 
 See

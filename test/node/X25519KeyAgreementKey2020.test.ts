@@ -238,6 +238,94 @@ describe('X25519KeyAgreementKey2020', () => {
     })
   })
 
+  describe('Multikey', () => {
+    const MULTIKEY_CONTEXT = 'https://w3id.org/security/multikey/v1'
+
+    it('toMultikey() emits a public Multikey by default', async () => {
+      const key = new X25519KeyAgreementKey2020({
+        controller: 'did:example:1234',
+        ...mockKey
+      })
+      const multikey = key.toMultikey()
+
+      expect(multikey.type).toBe('Multikey')
+      expect(multikey['@context']).toBe(MULTIKEY_CONTEXT)
+      expect(multikey.controller).toBe('did:example:1234')
+      expect(multikey.id).toBe(`did:example:1234#${mockKey.publicKeyMultibase}`)
+      expect(multikey.publicKeyMultibase).toBe(mockKey.publicKeyMultibase)
+      expect(multikey).not.toHaveProperty('secretKeyMultibase')
+    })
+
+    it('toMultikey() emits secretKeyMultibase when requested', async () => {
+      const key = new X25519KeyAgreementKey2020({ ...mockKey })
+      const multikey = key.toMultikey({ secretKey: true })
+
+      // X25519 secret carries the same header in both serializations.
+      expect(multikey.secretKeyMultibase).toBe(mockKey.privateKeyMultibase)
+    })
+
+    it('toMultikey() omits the context when includeContext is false', async () => {
+      const key = new X25519KeyAgreementKey2020({ ...mockKey })
+      const multikey = key.toMultikey({ includeContext: false })
+
+      expect(multikey).not.toHaveProperty('@context')
+    })
+
+    it('fromMultikey() round-trips public and secret key material', async () => {
+      const original = new X25519KeyAgreementKey2020({
+        controller: 'did:example:1234',
+        ...mockKey
+      })
+      const imported = X25519KeyAgreementKey2020.fromMultikey(
+        original.toMultikey({ secretKey: true })
+      )
+
+      expect(imported.type).toBe('X25519KeyAgreementKey2020')
+      expect(imported.id).toBe(`did:example:1234#${mockKey.publicKeyMultibase}`)
+      expect(imported.controller).toBe('did:example:1234')
+      expect(imported.publicKeyMultibase).toBe(mockKey.publicKeyMultibase)
+      expect(imported.privateKeyMultibase).toBe(mockKey.privateKeyMultibase)
+    })
+
+    it('from() dispatches a Multikey-typed document to fromMultikey()', async () => {
+      const key = await X25519KeyAgreementKey2020.from({
+        type: 'Multikey',
+        controller: 'did:example:1234',
+        publicKeyMultibase: mockKey.publicKeyMultibase
+      })
+
+      expect(key.type).toBe('X25519KeyAgreementKey2020')
+      expect(key.publicKeyMultibase).toBe(mockKey.publicKeyMultibase)
+    })
+
+    it('round-trips through Multikey and still derives the shared secret', async () => {
+      const alice = await X25519KeyAgreementKey2020.generate()
+      const bob = await X25519KeyAgreementKey2020.generate()
+      const aliceReimported = X25519KeyAgreementKey2020.fromMultikey(
+        alice.toMultikey({ secretKey: true })
+      )
+
+      const secret = await alice.deriveSecret({ publicKey: bob })
+      const reimportedSecret = await aliceReimported.deriveSecret({
+        publicKey: bob
+      })
+      expect(reimportedSecret).toEqual(secret)
+    })
+
+    it('fromMultikey() rejects an invalid public key header', async () => {
+      let error: any
+      try {
+        X25519KeyAgreementKey2020.fromMultikey({
+          type: 'Multikey',
+          publicKeyMultibase: 'zNotAnX25519Key'
+        })
+      } catch (e) {
+        error = e
+      }
+      expect(error.message).toContain('invalid header bytes')
+    })
+  })
+
   describe('Backwards compat with X25519KeyAgreementKey2019', () => {
     it('2020 key should import from 2019', async () => {
       const keyPair2019 = await X25519KeyAgreementKey2019.generate({
