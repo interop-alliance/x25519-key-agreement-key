@@ -172,6 +172,28 @@ describe('X25519KeyAgreementKey2020', () => {
       expect(key.publicKeyMultibase).toBe(newKey.publicKeyMultibase)
     })
 
+    it('should leave id/controller unset by default', async () => {
+      const key = await X25519KeyAgreementKey2020.generate()
+      const newKey = X25519KeyAgreementKey2020.fromFingerprint({
+        fingerprint: key.fingerprint()
+      })
+
+      expect(newKey.controller).toBeUndefined()
+      expect(newKey.id).toBeUndefined()
+    })
+
+    it('should set a did:key identity when didKey is true', async () => {
+      const key = await X25519KeyAgreementKey2020.generate()
+      const fingerprint = key.fingerprint()
+      const newKey = X25519KeyAgreementKey2020.fromFingerprint({
+        fingerprint,
+        didKey: true
+      })
+
+      expect(newKey.controller).toBe(`did:key:${fingerprint}`)
+      expect(newKey.id).toBe(`did:key:${fingerprint}#${fingerprint}`)
+    })
+
     it('should verify via verifyFingerprint()', async () => {
       const key = await X25519KeyAgreementKey2020.generate()
       const fingerprint = key.fingerprint()
@@ -179,6 +201,40 @@ describe('X25519KeyAgreementKey2020', () => {
       const result = key.verifyFingerprint({ fingerprint })
       expect(result.verified).toBe(true)
       expect(result.error).toBeUndefined()
+    })
+  })
+
+  describe('from', () => {
+    it('should default a did:key controller/id when didKey is true', async () => {
+      const { publicKeyMultibase, privateKeyMultibase } = mockKey
+      const key = await X25519KeyAgreementKey2020.from({
+        publicKeyMultibase,
+        privateKeyMultibase,
+        didKey: true
+      })
+
+      expect(key.controller).toBe(`did:key:${publicKeyMultibase}`)
+      expect(key.id).toBe(`did:key:${publicKeyMultibase}#${publicKeyMultibase}`)
+    })
+
+    it('should not override an explicit controller when didKey is true', async () => {
+      const { publicKeyMultibase } = mockKey
+      const key = await X25519KeyAgreementKey2020.from({
+        controller: 'did:example:1234',
+        publicKeyMultibase,
+        didKey: true
+      })
+
+      expect(key.controller).toBe('did:example:1234')
+      expect(key.id).toBe(`did:example:1234#${publicKeyMultibase}`)
+    })
+
+    it('should leave id/controller unset when didKey is omitted', async () => {
+      const { publicKeyMultibase } = mockKey
+      const key = await X25519KeyAgreementKey2020.from({ publicKeyMultibase })
+
+      expect(key.controller).toBeUndefined()
+      expect(key.id).toBeUndefined()
     })
   })
 

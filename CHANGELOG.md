@@ -1,5 +1,17 @@
 # @interop/x25519-key-agreement-key Changelog
 
+## Unreleased - TBD
+
+### Added
+
+- `from()` and `fromFingerprint()` accept an opt-in `didKey` flag. When `true`
+  (and no `controller`/`id` is already present), the key's `controller` defaults
+  to its own `did:key` form (`did:key:<publicKeyMultibase>`), so the constructor
+  derives a self-contained `did:key:<mb>#<mb>` `id`. Off by default, so existing
+  behavior is unchanged. This lets consumers (e.g. EDV / minimal-cipher
+  recipients) get a fully self-identified key without hand-building the `did:key`
+  controller string.
+
 ## 5.0.0 - 2026-06-13
 
 ### Changed
