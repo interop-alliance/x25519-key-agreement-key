@@ -1,6 +1,6 @@
 {
   "name": "@interop/x25519-key-agreement-key",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "description": "An X25519 (Curve25519) DH (Diffie-Hellman) key implementation to work with the X25519 2020 Crypto suite.",
   "homepage": "https://github.com/interop-alliance/x25519-key-agreement-key",
   "repository": {
@@ -39,7 +39,7 @@
   },
   "sideEffects": false,
   "dependencies": {
-    "@interop/data-integrity-core": "^8.0.0",
+    "@interop/data-integrity-core": "^8.1.0",
     "@noble/curves": "^2.2.0",
     "@scure/base": "^2.2.0"
   },
