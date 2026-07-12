@@ -13,7 +13,7 @@ import {
   type IVerificationResult,
   type IVerifier
 } from '@interop/data-integrity-core'
-import { ed25519 } from '@noble/curves/ed25519.js'
+import { ed25519, x25519 } from '@noble/curves/ed25519.js'
 
 import { base58btc } from './baseX.js'
 import {
@@ -30,9 +30,9 @@ const MULTICODEC_ED25519_PUB_HEADER = new Uint8Array([0xed, 0x01])
 // multicodec ed25519-priv header as varint
 const MULTICODEC_ED25519_PRIV_HEADER = new Uint8Array([0x80, 0x26])
 // multicodec x25519-pub header as varint
-const MULTICODEC_X25519_PUB_HEADER = new Uint8Array([0xec, 0x01])
+export const MULTICODEC_X25519_PUB_HEADER = new Uint8Array([0xec, 0x01])
 // multicodec x25519-priv header as varint
-const MULTICODEC_X25519_PRIV_HEADER = new Uint8Array([0x82, 0x26])
+export const MULTICODEC_X25519_PRIV_HEADER = new Uint8Array([0x82, 0x26])
 const MULTIKEY_CONTEXT_V1_URL = 'https://w3id.org/security/multikey/v1'
 
 /**
@@ -116,15 +116,66 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
     const { publicKey, privateKey } = await generateKeyPair()
 
     return new X25519KeyAgreementKey2020({
-      publicKeyMultibase: _multibaseEncode(
+      publicKeyMultibase: multibaseEncode(
         MULTICODEC_X25519_PUB_HEADER,
         publicKey
       ),
-      privateKeyMultibase: _multibaseEncode(
+      privateKeyMultibase: multibaseEncode(
         MULTICODEC_X25519_PRIV_HEADER,
         privateKey
       ),
       ...options
+    })
+  }
+
+  /**
+   * Creates an X25519KeyAgreementKey2020 Key Pair from a raw 32-byte X25519
+   * secret (constructor method). The public key and the multibase encodings are
+   * derived internally, so callers that hold only the raw secret bytes (e.g. a
+   * secret unwrapped from a JWE recipient) do not have to multibase-encode them
+   * by hand.
+   *
+   * @param {object} options - Options hashmap.
+   * @param {Uint8Array} options.secret - The raw 32-byte X25519 secret.
+   * @param {string} [options.controller] - Controller DID or document url.
+   * @param {string} [options.id] - Key ID.
+   * @param {boolean} [options.didKey=false] - When no `controller`/`id` is
+   *   given, default the `controller` to the key's own `did:key` form (see
+   *   {@link from}).
+   *
+   * @returns {X25519KeyAgreementKey2020} An X25519 Key Pair.
+   */
+  static fromRawSecret({
+    secret,
+    controller,
+    id,
+    didKey = false
+  }: {
+    secret: Uint8Array
+    controller?: string
+    id?: string
+    didKey?: boolean
+  }): X25519KeyAgreementKey2020 {
+    if (!(secret instanceof Uint8Array) || secret.length !== 32) {
+      throw new Error('"secret" must be a 32-byte Uint8Array.')
+    }
+    const publicKey = x25519.getPublicKey(secret)
+    const publicKeyMultibase = multibaseEncode(
+      MULTICODEC_X25519_PUB_HEADER,
+      publicKey
+    )
+    const privateKeyMultibase = multibaseEncode(
+      MULTICODEC_X25519_PRIV_HEADER,
+      secret
+    )
+    if (didKey && !controller && !id) {
+      controller = `did:key:${publicKeyMultibase}`
+    }
+    return new X25519KeyAgreementKey2020({
+      controller,
+      id,
+      publicKeyMultibase,
+      privateKeyMultibase
     })
   }
 
@@ -239,14 +290,14 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
 
     if (publicKeyBase58) {
       // prefix with `z` to indicate multi-base base58btc encoding
-      publicKeyMultibase = _multibaseEncode(
+      publicKeyMultibase = multibaseEncode(
         MULTICODEC_X25519_PUB_HEADER,
         base58btc.decode(publicKeyBase58)
       )
     }
     if (privateKeyBase58) {
       // prefix with `z` to indicate multi-base base58btc encoding
-      privateKeyMultibase = _multibaseEncode(
+      privateKeyMultibase = multibaseEncode(
         MULTICODEC_X25519_PRIV_HEADER,
         base58btc.decode(privateKeyBase58)
       )
@@ -321,7 +372,7 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
       throw new Error('Source public key is required to convert.')
     }
 
-    const edPubkeyBytes = _multibaseDecode(
+    const edPubkeyBytes = multibaseDecode(
       MULTICODEC_ED25519_PUB_HEADER,
       publicKeyMultibase
     )
@@ -334,7 +385,7 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
     } catch {
       throw new Error('Error converting to X25519; Invalid Ed25519 public key.')
     }
-    return _multibaseEncode(MULTICODEC_X25519_PUB_HEADER, dhPubkeyBytes)
+    return multibaseEncode(MULTICODEC_X25519_PUB_HEADER, dhPubkeyBytes)
   }
 
   /**
@@ -351,7 +402,7 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
       throw new Error('Source private key is required to convert.')
     }
 
-    const edPrivkeyBytes = _multibaseDecode(
+    const edPrivkeyBytes = multibaseDecode(
       MULTICODEC_ED25519_PRIV_HEADER,
       privateKeyMultibase
     )
@@ -363,7 +414,7 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
         'Error converting to X25519; Invalid Ed25519 private key.'
       )
     }
-    return _multibaseEncode(MULTICODEC_X25519_PRIV_HEADER, dhPrivkeyBytes)
+    return multibaseEncode(MULTICODEC_X25519_PRIV_HEADER, dhPrivkeyBytes)
   }
 
   /**
@@ -441,7 +492,10 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
   toMultikey({
     secretKey = false,
     includeContext = true
-  }: { secretKey?: boolean; includeContext?: boolean } = {}): IMultikeyDocument {
+  }: {
+    secretKey?: boolean
+    includeContext?: boolean
+  } = {}): IMultikeyDocument {
     const publicShape: IPublicMultikey = {
       type: 'Multikey',
       publicKeyMultibase: this.publicKeyMultibase
@@ -532,16 +586,34 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
   }: {
     publicKey: { publicKeyMultibase?: string }
   }): Promise<Uint8Array> {
-    const remotePublicKey = _multibaseDecode(
+    const remotePublicKey = multibaseDecode(
       MULTICODEC_X25519_PUB_HEADER,
       publicKey.publicKeyMultibase as string
     )
-    const privateKey = _multibaseDecode(
+    const privateKey = multibaseDecode(
       MULTICODEC_X25519_PRIV_HEADER,
       this.privateKeyMultibase as string
     )
 
     return deriveSecret({ privateKey, remotePublicKey })
+  }
+
+  /**
+   * The raw 32-byte X25519 secret, decoded from `privateKeyMultibase` (the
+   * inverse of {@link fromRawSecret}). Useful for callers that must wrap the
+   * secret to a recipient or hand it to a lower-level cipher. Throws if this is
+   * a public-key-only instance.
+   *
+   * @returns {Uint8Array} The raw 32-byte secret.
+   */
+  get rawSecret(): Uint8Array {
+    if (!this.privateKeyMultibase) {
+      throw new Error('This key pair has no private key material.')
+    }
+    return multibaseDecode(
+      MULTICODEC_X25519_PRIV_HEADER,
+      this.privateKeyMultibase
+    )
   }
 
   /**
@@ -621,12 +693,10 @@ function _isValidKeyHeader(
   multibaseKey: unknown,
   expectedHeader: Uint8Array
 ): boolean {
-  if (
-    !(
-      typeof multibaseKey === 'string' &&
-      multibaseKey[0] === MULTIBASE_BASE58BTC_HEADER
-    )
-  ) {
+  if (!(
+    typeof multibaseKey === 'string' &&
+    multibaseKey[0] === MULTIBASE_BASE58BTC_HEADER
+  )) {
     return false
   }
 
@@ -641,7 +711,7 @@ function _isValidKeyHeader(
  * @param {Uint8Array} bytes - Bytes to encode.
  * @returns {string} Multibase-encoded string.
  */
-function _multibaseEncode(header: Uint8Array, bytes: Uint8Array): string {
+export function multibaseEncode(header: Uint8Array, bytes: Uint8Array): string {
   const mcBytes = new Uint8Array(header.length + bytes.length)
 
   mcBytes.set(header)
@@ -657,7 +727,7 @@ function _multibaseEncode(header: Uint8Array, bytes: Uint8Array): string {
  * @param {string} text - Multibase encoded string to decode.
  * @returns {Uint8Array} Decoded bytes.
  */
-function _multibaseDecode(header: Uint8Array, text: string): Uint8Array {
+export function multibaseDecode(header: Uint8Array, text: string): Uint8Array {
   const mcValue = base58btc.decode(text.substr(1))
 
   if (!header.every((val, i) => mcValue[i] === val)) {

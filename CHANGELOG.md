@@ -1,5 +1,22 @@
 # @interop/x25519-key-agreement-key Changelog
 
+## 5.2.0 - TBD
+
+### Added
+
+- Export the multibase framing helpers as public API: `multibaseEncode`,
+  `multibaseDecode`, and the `MULTICODEC_X25519_PUB_HEADER` /
+  `MULTICODEC_X25519_PRIV_HEADER` multicodec header constants. Consumers can now
+  reuse the suite's exact base58btc multibase encoding instead of hand-rolling
+  their own.
+- `X25519KeyAgreementKey2020.fromRawSecret({ secret })` constructs a key pair
+  from a raw 32-byte X25519 secret (validated), deriving the public key and the
+  multibase encodings internally. Accepts the usual `controller` / `id` /
+  `didKey` options.
+- `X25519KeyAgreementKey2020#rawSecret` getter returns the raw 32-byte secret
+  decoded from `privateKeyMultibase` (the inverse of `fromRawSecret`); throws on
+  a public-key-only instance.
+
 ## 5.1.2 - 2026-07-10
 
 ### Changed
@@ -21,8 +38,8 @@
   to its own `did:key` form (`did:key:<publicKeyMultibase>`), so the constructor
   derives a self-contained `did:key:<mb>#<mb>` `id`. Off by default, so existing
   behavior is unchanged. This lets consumers (e.g. EDV / minimal-cipher
-  recipients) get a fully self-identified key without hand-building the `did:key`
-  controller string.
+  recipients) get a fully self-identified key without hand-building the
+  `did:key` controller string.
 - Multikey interop. `fromMultikey()` constructs an instance from a
   `type: 'Multikey'` verification method, and `from()` now dispatches a
   Multikey-typed document to it (so a recipient whose DID document publishes its

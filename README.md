@@ -4,7 +4,8 @@
 [![NPM Version](https://img.shields.io/npm/v/@interop/x25519-key-agreement-key)](https://www.npmjs.com/package/@interop/x25519-key-agreement-key)
 
 > An X25519 (Curve25519) DH (Diffie-Hellman) key implementation to work with the
-> X25519 2020 Crypto suite for JS/TypeScript, for Node.js, browser and React Native.
+> X25519 2020 Crypto suite for JS/TypeScript, for Node.js, browser and React
+> Native.
 
 ## Table of Contents
 
@@ -30,7 +31,8 @@ To actually perform encryption with those keys, we recommend you use the
 [`minimal-cipher`](https://github.com/digitalbazaar/minimal-cipher) library.
 
 This is a low-level level library to generate and serialize X25519 (Curve25519)
-key pairs (uses [`@noble/curves`](https://github.com/paulmillr/noble-curves) under the hood).
+key pairs (uses [`@noble/curves`](https://github.com/paulmillr/noble-curves)
+under the hood).
 
 See also (related specs):
 
@@ -155,6 +157,36 @@ const multikey = keyPair.toMultikey({ secretKey: true });
 }
 
 const keyPair = await X25519KeyAgreementKey2020.from(multikey);
+```
+
+Working with a raw 32-byte secret. `fromRawSecret()` builds a key pair from raw
+secret bytes (deriving the public key and multibase encodings for you), and the
+`rawSecret` getter is its inverse:
+
+```js
+const keyPair = X25519KeyAgreementKey2020.fromRawSecret({ secret })
+// keyPair.rawSecret -> the same 32-byte Uint8Array
+
+// pass `didKey: true` for a self-contained did:key identity
+const recipient = X25519KeyAgreementKey2020.fromRawSecret({
+  secret,
+  didKey: true
+})
+```
+
+The multibase framing helpers used internally are also exported, so consumers
+can reuse the suite's exact base58btc multibase encoding:
+
+```js
+import {
+  multibaseEncode,
+  multibaseDecode,
+  MULTICODEC_X25519_PUB_HEADER,
+  MULTICODEC_X25519_PRIV_HEADER
+} from '@interop/x25519-key-agreement-key'
+
+const publicKeyMultibase = multibaseEncode(MULTICODEC_X25519_PUB_HEADER, bytes)
+const bytes = multibaseDecode(MULTICODEC_X25519_PUB_HEADER, publicKeyMultibase)
 ```
 
 ## Contribute
