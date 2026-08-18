@@ -1,6 +1,6 @@
 # @interop/x25519-key-agreement-key Changelog
 
-## 5.2.2 - TBD
+## 5.2.2 - 2026-08-18
 
 ### Changed
 - Update to latest `@interop/data-integrity-core@8.7.1`.
