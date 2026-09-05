@@ -1,8 +1,21 @@
 # @interop/x25519-key-agreement-key Changelog
 
+## 5.3.0 - TBD
+
+### Changed
+
+- Internal multikey decoding now goes through `decodeMultikey` from
+  `@interop/data-integrity-core/multihash` instead of hand-rolled header-byte
+  comparison. This closes a gap where a multibase string missing its `z` prefix
+  could be silently mis-decoded, and adds a key-length check. The public
+  `multibaseDecode`/`multibaseEncode` helpers and the
+  `MULTICODEC_X25519_PUB_HEADER`/`MULTICODEC_X25519_PRIV_HEADER` constants are
+  unchanged.
+
 ## 5.2.2 - 2026-08-18
 
 ### Changed
+
 - Update to latest `@interop/data-integrity-core@8.7.1`.
 
 ## 5.2.1 - 2026-07-17

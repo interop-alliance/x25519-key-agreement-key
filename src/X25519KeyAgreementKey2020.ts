@@ -13,6 +13,10 @@ import {
   type IVerificationResult,
   type IVerifier
 } from '@interop/data-integrity-core'
+import {
+  decodeMultikey,
+  MultikeyCodec
+} from '@interop/data-integrity-core/multihash'
 import { ed25519, x25519 } from '@noble/curves/ed25519.js'
 
 import { base58btc } from './baseX.js'
@@ -25,10 +29,6 @@ import {
 const SUITE_ID = 'X25519KeyAgreementKey2020'
 // multibase base58-btc header
 const MULTIBASE_BASE58BTC_HEADER = 'z'
-// multicodec ed25519-pub header as varint
-const MULTICODEC_ED25519_PUB_HEADER = new Uint8Array([0xed, 0x01])
-// multicodec ed25519-priv header as varint
-const MULTICODEC_ED25519_PRIV_HEADER = new Uint8Array([0x80, 0x26])
 // multicodec x25519-pub header as varint
 export const MULTICODEC_X25519_PUB_HEADER = new Uint8Array([0xec, 0x01])
 // multicodec x25519-priv header as varint
@@ -79,7 +79,7 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
 
     if (
       !publicKeyMultibase ||
-      !_isValidKeyHeader(publicKeyMultibase, MULTICODEC_X25519_PUB_HEADER)
+      !_isValidKeyHeader(publicKeyMultibase, MultikeyCodec.X25519_PUB)
     ) {
       throw new Error(
         '"publicKeyMultibase" has invalid header bytes: ' +
@@ -89,7 +89,7 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
 
     if (
       privateKeyMultibase &&
-      !_isValidKeyHeader(privateKeyMultibase, MULTICODEC_X25519_PRIV_HEADER)
+      !_isValidKeyHeader(privateKeyMultibase, MultikeyCodec.X25519_PRIV)
     ) {
       throw new Error('"privateKeyMultibase" has invalid header bytes.')
     }
@@ -237,7 +237,7 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
    */
   static fromMultikey(options: IMultikeyDocument): X25519KeyAgreementKey2020 {
     const { id, controller, publicKeyMultibase, revoked } = options
-    if (!_isValidKeyHeader(publicKeyMultibase, MULTICODEC_X25519_PUB_HEADER)) {
+    if (!_isValidKeyHeader(publicKeyMultibase, MultikeyCodec.X25519_PUB)) {
       throw new TypeError(
         '"publicKeyMultibase" has invalid header bytes: ' +
           `"${publicKeyMultibase}".`
@@ -247,9 +247,7 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
     let privateKeyMultibase: string | undefined
     if ('secretKeyMultibase' in options) {
       const { secretKeyMultibase } = options
-      if (
-        !_isValidKeyHeader(secretKeyMultibase, MULTICODEC_X25519_PRIV_HEADER)
-      ) {
+      if (!_isValidKeyHeader(secretKeyMultibase, MultikeyCodec.X25519_PRIV)) {
         throw new Error('"secretKeyMultibase" has invalid header bytes.')
       }
       // Same multicodec header and 32-byte length in both serializations, so
@@ -372,9 +370,9 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
       throw new Error('Source public key is required to convert.')
     }
 
-    const edPubkeyBytes = multibaseDecode(
-      MULTICODEC_ED25519_PUB_HEADER,
-      publicKeyMultibase
+    const edPubkeyBytes = _decodeKeyBytes(
+      publicKeyMultibase,
+      MultikeyCodec.ED25519_PUB
     )
 
     // Converts a 32-byte Ed25519 public key into a 32-byte Curve25519 key.
@@ -402,9 +400,9 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
       throw new Error('Source private key is required to convert.')
     }
 
-    const edPrivkeyBytes = multibaseDecode(
-      MULTICODEC_ED25519_PRIV_HEADER,
-      privateKeyMultibase
+    const edPrivkeyBytes = _decodeKeyBytes(
+      privateKeyMultibase,
+      MultikeyCodec.ED25519_PRIV
     )
     // Converts a 64-byte Ed25519 secret key (or just the first 32-byte part of
     // it, which is the secret value) into a 32-byte Curve25519 secret key
@@ -586,13 +584,13 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
   }: {
     publicKey: { publicKeyMultibase?: string }
   }): Promise<Uint8Array> {
-    const remotePublicKey = multibaseDecode(
-      MULTICODEC_X25519_PUB_HEADER,
-      publicKey.publicKeyMultibase as string
+    const remotePublicKey = _decodeKeyBytes(
+      publicKey.publicKeyMultibase as string,
+      MultikeyCodec.X25519_PUB
     )
-    const privateKey = multibaseDecode(
-      MULTICODEC_X25519_PRIV_HEADER,
-      this.privateKeyMultibase as string
+    const privateKey = _decodeKeyBytes(
+      this.privateKeyMultibase as string,
+      MultikeyCodec.X25519_PRIV
     )
 
     return deriveSecret({ privateKey, remotePublicKey })
@@ -610,10 +608,7 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
     if (!this.privateKeyMultibase) {
       throw new Error('This key pair has no private key material.')
     }
-    return multibaseDecode(
-      MULTICODEC_X25519_PRIV_HEADER,
-      this.privateKeyMultibase
-    )
+    return _decodeKeyBytes(this.privateKeyMultibase, MultikeyCodec.X25519_PRIV)
   }
 
   /**
@@ -647,7 +642,7 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
   }: { fingerprint?: string } = {}): IVerificationResult {
     // fingerprint should have `z` prefix indicating
     // that it's base58btc multibase encoded
-    if (!_isValidKeyHeader(fingerprint, MULTICODEC_X25519_PUB_HEADER)) {
+    if (!_isValidKeyHeader(fingerprint, MultikeyCodec.X25519_PUB)) {
       throw new Error(
         `"fingerprint" has invalid header bytes: "${fingerprint}".`
       )
@@ -683,25 +678,53 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
 }
 
 /**
- * Checks to see if the given value is a valid multibase encoded key.
+ * Checks to see if the given value is a valid multibase encoded key of the
+ * expected multikey codec. Delegates to `decodeMultikey`, so this also
+ * catches a missing `z` multibase prefix and a wrong key length, neither of
+ * which the previous header-byte comparison checked.
  *
- * @param {Uint8Array} multibaseKey - The multibase-encoded key value.
- * @param {Uint8Array} expectedHeader - The expected header for the key value.
- * @returns {boolean} Returns true if the header is valid, false otherwise.
+ * @param {unknown} multibaseKey - The multibase-encoded key value.
+ * @param {MultikeyCodec} expectedCodec - The expected multikey codec.
+ * @returns {boolean} Returns true if the key decodes as that codec, false
+ *   otherwise.
  */
 function _isValidKeyHeader(
   multibaseKey: unknown,
-  expectedHeader: Uint8Array
+  expectedCodec: MultikeyCodec
 ): boolean {
-  if (!(
-    typeof multibaseKey === 'string' &&
-    multibaseKey[0] === MULTIBASE_BASE58BTC_HEADER
-  )) {
+  if (typeof multibaseKey !== 'string') {
     return false
   }
+  try {
+    decodeMultikey({ multikey: multibaseKey, expectedCodec })
+    return true
+  } catch {
+    return false
+  }
+}
 
-  const keyBytes = base58btc.decode(multibaseKey.slice(1))
-  return expectedHeader.every((val, i) => keyBytes[i] === val)
+/**
+ * Decodes a multibase-encoded multikey of the expected codec, mapping any
+ * `decodeMultikey` failure (a missing `z` prefix, malformed base58, a
+ * mismatched codec, or a wrong key length) to this suite's historical
+ * "invalid header" wording, so existing callers keep seeing the same error
+ * shape they always have rather than a library-internal message.
+ *
+ * @param {string} multibaseKey - The multibase-encoded key value.
+ * @param {MultikeyCodec} expectedCodec - The expected multikey codec.
+ * @returns {Uint8Array} The decoded raw key bytes.
+ */
+function _decodeKeyBytes(
+  multibaseKey: string,
+  expectedCodec: MultikeyCodec
+): Uint8Array {
+  try {
+    return decodeMultikey({ multikey: multibaseKey, expectedCodec }).keyBytes
+  } catch (err) {
+    throw new Error('Multibase value does not have expected header.', {
+      cause: err
+    })
+  }
 }
 
 /**
