@@ -67,37 +67,33 @@ describe('X25519KeyAgreementKey2020 error paths', () => {
     })
   })
 
-  describe('fromEd25519VerificationKey2020', () => {
+  describe('fromEd25519', () => {
     it('throws if source public key is missing', () => {
-      expect(() =>
-        X25519KeyAgreementKey2020.fromEd25519VerificationKey2020({
-          keyPair: {}
-        })
-      ).toThrow('Source public key is required to convert.')
+      expect(() => X25519KeyAgreementKey2020.fromEd25519({})).toThrow(
+        'Source public key is required to convert.'
+      )
     })
 
     it('throws if public key is not multibase base58btc encoded', () => {
       expect(() =>
-        X25519KeyAgreementKey2020.fromEd25519VerificationKey2020({
-          keyPair: { publicKeyMultibase: 'not-base58btc' }
+        X25519KeyAgreementKey2020.fromEd25519({
+          publicKeyMultibase: 'not-base58btc'
         })
       ).toThrow(/must start with "z"/)
     })
 
     it('throws if private key is not multibase base58btc encoded', () => {
       expect(() =>
-        X25519KeyAgreementKey2020.fromEd25519VerificationKey2020({
-          keyPair: {
-            publicKeyMultibase: edPublicKeyMultibase,
-            privateKeyMultibase: 'not-base58btc'
-          }
+        X25519KeyAgreementKey2020.fromEd25519({
+          publicKeyMultibase: edPublicKeyMultibase,
+          privateKeyMultibase: 'not-base58btc'
         })
       ).toThrow(/must start with "z"/)
     })
 
     it('converts a public-key-only source key', () => {
-      const xKey = X25519KeyAgreementKey2020.fromEd25519VerificationKey2020({
-        keyPair: { publicKeyMultibase: edPublicKeyMultibase }
+      const xKey = X25519KeyAgreementKey2020.fromEd25519({
+        publicKeyMultibase: edPublicKeyMultibase
       })
 
       expect(xKey.publicKeyMultibase).toBe(

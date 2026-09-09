@@ -36,10 +36,12 @@ export const MULTICODEC_X25519_PRIV_HEADER = new Uint8Array([0x82, 0x26])
 const MULTIKEY_CONTEXT_V1_URL = 'https://w3id.org/security/multikey/v1'
 
 /**
- * A source Ed25519 verification key (2020) shape, used by the
- * `fromEd25519VerificationKey2020` conversion method.
+ * A source Ed25519 key shape, used by the `fromEd25519` conversion method.
+ * Any object carrying multicodec-prefixed base58btc Ed25519 multibase fields
+ * satisfies it: a VerificationKey2020 descriptor, a Multikey document, or a
+ * live `Ed25519VerificationKey` instance.
  */
-interface Ed25519VerificationKey2020Like {
+interface Ed25519KeyLike {
   controller?: string
   publicKeyMultibase?: string
   privateKeyMultibase?: string
@@ -308,27 +310,30 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
   }
 
   /**
-   * Converts a keypair instance of type Ed25519VerificationKey2020 to an
-   * instance of this class.
+   * Derives an X25519 key agreement key from an Ed25519 key, converting the
+   * Edwards public key (and private key, when present) to Montgomery form.
+   * The source is any object carrying Ed25519 multibase fields; the same
+   * multicodec-prefixed base58btc encoding is shared by VerificationKey2020
+   * descriptors, Multikey documents, and `Ed25519VerificationKey` instances.
    *
-   * @see https://github.com/digitalbazaar/ed25519-verification-key-2020
+   * @param options {object}
+   * @param [options.controller] {string} Carried over to the derived key.
+   * @param options.publicKeyMultibase {string} Multibase Ed25519 public key.
+   * @param [options.privateKeyMultibase] {string} Multibase Ed25519 private
+   *   key.
    *
-   * @param {object} [options={}] - Options hashmap.
-   * @param {Ed25519VerificationKey2020} options.keyPair - Source key pair.
-   *
-   * @returns {X25519KeyAgreementKey2020} A derived/converted key agreement
-   *   key pair.
+   * @returns {X25519KeyAgreementKey2020} The derived key agreement key.
    */
-  static fromEd25519VerificationKey2020({
-    keyPair
-  }: {
-    keyPair: Ed25519VerificationKey2020Like
-  }): X25519KeyAgreementKey2020 {
-    if (!keyPair.publicKeyMultibase) {
+  static fromEd25519({
+    controller,
+    publicKeyMultibase,
+    privateKeyMultibase
+  }: Ed25519KeyLike): X25519KeyAgreementKey2020 {
+    if (!publicKeyMultibase) {
       throw new Error('Source public key is required to convert.')
     }
 
-    if (!keyPair.publicKeyMultibase.startsWith(MULTIBASE_BASE58BTC_HEADER)) {
+    if (!publicKeyMultibase.startsWith(MULTIBASE_BASE58BTC_HEADER)) {
       throw new TypeError(
         'Expecting "publicKeyMultibase" value to be multibase base58btc ' +
           'encoded (must start with "z").'
@@ -336,13 +341,14 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
     }
 
     const xKey = new X25519KeyAgreementKey2020({
-      controller: keyPair.controller,
-      publicKeyMultibase:
-        X25519KeyAgreementKey2020.convertFromEdPublicKey(keyPair)
+      controller,
+      publicKeyMultibase: X25519KeyAgreementKey2020.convertFromEdPublicKey({
+        publicKeyMultibase
+      })
     })
 
-    if (keyPair.privateKeyMultibase) {
-      if (!keyPair.privateKeyMultibase.startsWith(MULTIBASE_BASE58BTC_HEADER)) {
+    if (privateKeyMultibase) {
+      if (!privateKeyMultibase.startsWith(MULTIBASE_BASE58BTC_HEADER)) {
         throw new TypeError(
           'Expecting "privateKeyMultibase" value to be multibase base58btc ' +
             'encoded (must start with "z").'
@@ -350,10 +356,29 @@ export class X25519KeyAgreementKey2020 extends AbstractKeyPair {
       }
 
       xKey.privateKeyMultibase =
-        X25519KeyAgreementKey2020.convertFromEdPrivateKey(keyPair)
+        X25519KeyAgreementKey2020.convertFromEdPrivateKey({
+          privateKeyMultibase
+        })
     }
 
     return xKey
+  }
+
+  /**
+   * Older name for `fromEd25519()`, which takes the source key fields
+   * directly. The conversion never depended on the 2020 serialization.
+   *
+   * @param options {object}
+   * @param options.keyPair {Ed25519KeyLike} Source key.
+   *
+   * @returns {X25519KeyAgreementKey2020} The derived key agreement key.
+   */
+  static fromEd25519VerificationKey2020({
+    keyPair
+  }: {
+    keyPair: Ed25519KeyLike
+  }): X25519KeyAgreementKey2020 {
+    return X25519KeyAgreementKey2020.fromEd25519(keyPair)
   }
 
   /**

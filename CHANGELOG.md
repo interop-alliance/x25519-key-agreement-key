@@ -1,5 +1,15 @@
 # @interop/x25519-key-agreement-key Changelog
 
+## 5.4.0 - TBD
+
+### Added
+
+- `X25519KeyAgreementKey2020.fromEd25519()` derives a key agreement key from any
+  object carrying Ed25519 multibase fields (`controller`, `publicKeyMultibase`,
+  `privateKeyMultibase`), including a live `Ed25519VerificationKey` instance.
+  `fromEd25519VerificationKey2020()` now delegates to it; the conversion never
+  depended on the 2020 serialization.
+
 ## 5.3.0 - 2026-09-05
 
 ### Changed

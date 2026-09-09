@@ -49,8 +49,8 @@ describe('X25519KeyAgreementKey2020', () => {
     })
   })
 
-  describe('fromEd25519VerificationKey2020', () => {
-    it('should convert both public and private key (2020)', async () => {
+  describe('fromEd25519', () => {
+    it('converts both public and private key from a live key instance', async () => {
       const edKeyPair = await Ed25519VerificationKey2020.from({
         controller: 'did:example:123',
         publicKeyMultibase: 'z6Mkon3Necd6NkkyfoGoHxid2znGc59LU3K7mubaRcFbLfLX',
@@ -59,11 +59,7 @@ describe('X25519KeyAgreementKey2020', () => {
           'PvEp4XtzGp2VWwQSQAXMxDyqrnVurYg2sBiqiu1FHDDM'
       })
 
-      const xKeyPair = X25519KeyAgreementKey2020.fromEd25519VerificationKey2020(
-        {
-          keyPair: edKeyPair
-        }
-      )
+      const xKeyPair = X25519KeyAgreementKey2020.fromEd25519(edKeyPair)
 
       expect(xKeyPair.type).toBe('X25519KeyAgreementKey2020')
       expect(xKeyPair.controller).toBe('did:example:123')
@@ -79,6 +75,16 @@ describe('X25519KeyAgreementKey2020', () => {
 
       expect(exported).toHaveProperty('publicKeyMultibase')
       expect(exported).not.toHaveProperty('privateKeyMultibase')
+    })
+
+    it('is reachable under the older fromEd25519VerificationKey2020 name', () => {
+      const keyPair = {
+        controller: 'did:example:123',
+        publicKeyMultibase: 'z6Mkon3Necd6NkkyfoGoHxid2znGc59LU3K7mubaRcFbLfLX'
+      }
+      expect(
+        X25519KeyAgreementKey2020.fromEd25519VerificationKey2020({ keyPair })
+      ).toEqual(X25519KeyAgreementKey2020.fromEd25519(keyPair))
     })
   })
 
@@ -96,10 +102,7 @@ describe('X25519KeyAgreementKey2020', () => {
           'zrv2EET2WWZ8T1Jbg4fEH5cQxhbUS22XxdweypUbjWVzv1Y' +
           'D6VqYuW6LH7heQCNYQCuoKaDwvv2qCWz3uBzG2xesqmf'
       })
-      const remoteKey =
-        X25519KeyAgreementKey2020.fromEd25519VerificationKey2020({
-          keyPair: edKeyPair
-        })
+      const remoteKey = X25519KeyAgreementKey2020.fromEd25519(edKeyPair)
 
       const secret = await localKey.deriveSecret({ publicKey: remoteKey })
       const secretString = base58btc.encode(secret)
